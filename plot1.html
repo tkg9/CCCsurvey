@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <div id="Chart">
+    </div>
+    <svg height="360" width="400" xmlns="http://www.w3.org/2000/svg" version="1.1">
+      <defs>
+        <clipPath id="C">
+          <path d="M 0 0 L 64 0 L 32 64 z" />
+        </clipPath>
+        <radialGradient id="G1" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%"   style="stop-color:rgb(188,205,48);  stop-opacity:1" />
+          <stop offset="100%" style="stop-color:rgb(255,255,255); stop-opacity:0" />
+        </radialGradient>
+        <radialGradient id="G2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%"   style="stop-color:rgb(0,129,66);  stop-opacity:1" />
+          <stop offset="100%" style="stop-color:rgb(255,255,255); stop-opacity:0" />
+        </radialGradient>
+        <radialGradient id="G3" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+          <stop offset="0%"   style="stop-color:rgb(0,0,0);  stop-opacity:1" />
+          <stop offset="100%" style="stop-color:rgb(255,255,255); stop-opacity:0" />
+        </radialGradient>
+      </defs>
+      <ellipse cx="0" cy="0" rx="100" ry="100" clip-path="url(#C)" fill="url(#G1)" />
+      <ellipse cx="60" cy="0"  rx="100" ry="100" clip-path="url(#C)" fill="url(#G2)" />
+      <ellipse cx="35" cy="70" rx="100" ry="100" clip-path="url(#C)" fill="url(#G3)" />
+    </svg>
+<style>
+  div.tooltip {	
+    position: absolute;			
+    text-align: center;			
+    width: 60px;					
+    height: 28px;					
+    padding: 2px;				
+    font: 12px Optima;		
+    border: 0px;
+    color:black;	
+    pointer-events: none;
+}
+</style>    
+    <script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 720 - margin.left - margin.right,
+    height = 480 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#Chart")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .attr("xmlns","http://www.w3.org/2000/svg")
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+
+// Define the div for the tooltip
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
+//Read the data
+var data=d3.csv("https://raw.githubusercontent.com/tkg9/CCCsurvey/main/plotData.csv",
+
+
+function(data) {
+  // Add X axis
+  var x = d3.scaleSqrt()
+    .domain([0, 350])
+    .range([ 0, width ]);
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x));
+
+  // Add Y axis
+  var y = d3.scaleLinear()
+    .domain([0, 2500])
+    .range([ height, 0]);
+  svg.append("g")
+    .call(d3.axisLeft(y));
+
+    console.log("got all set up!");
+
+  // Add dots
+  svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("cx", function (d) { return x(d.total); } )
+      .attr("cy", function (d) { return y(d.cubic_ft); } )
+      .attr("fill", function (d) { return d.color; } )
+      .attr("r", 5)
+      .on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html(d.parish)                
+            .style("left", (d3.event.pageX) + "px")		
+            .style("top", (d3.event.pageY - 28) + "px");		
+            })					
+        .on("mouseout", function(d) {		
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);	
+        });
+
+})
+</script>
+</body>
+</html>
